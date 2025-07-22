@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import ttk, filedialog, messagebox
 import webbrowser
 from datetime import datetime
 
@@ -9,22 +9,37 @@ class SimpleNotepad:
         self.root.title("Cortex Notepad")
         self.root.state("zoomed")
 
+        # Custom fonts
+        self.menu_tab_font = ("Arial", 15, "bold")  # For File, Edit, Font Size tabs
+        self.menu_item_font = ("Arial", 12)         # For dropdown items
+        self.text_font = ("Arial", 12)              # For main text area
+
+        # Colors
         self.bg_color = "#2E2E2E"
         self.fg_color = "#D3D3D3"
         self.text_area_bg = "#333333"
         self.text_area_fg = "#FFFFFF"
 
-        self.font_size = 12
-        self.text_area = tk.Text(self.root, wrap=tk.WORD, undo=True,
-                                 font=("Arial", self.font_size),
-                                 bg=self.text_area_bg, fg=self.text_area_fg,
-                                 insertbackground=self.fg_color)
+        # Set default menu font (works on Windows/Linux)
+        self.root.option_add("*Menu.font", self.menu_tab_font)
+        
+        # Main text area
+        self.text_area = tk.Text(
+            self.root, 
+            wrap=tk.WORD, 
+            undo=True,
+            font=self.text_font,
+            bg=self.text_area_bg, 
+            fg=self.text_area_fg,
+            insertbackground=self.fg_color
+        )
         self.text_area.pack(expand=True, fill=tk.BOTH)
 
         self.filename = None
         self.create_menus()
         self.root.protocol("WM_DELETE_WINDOW", self.exit_app)
 
+        # Key bindings
         self.root.bind("<Control-s>", self.save_file)
         self.root.bind("<Control-Shift-s>", self.save_as_file)
         self.root.bind("<Control-f>", self.find_text)
@@ -33,7 +48,8 @@ class SimpleNotepad:
         self.root.bind("<Control-e>", self.search_selected_word_on_edge)
         self.root.bind("<Control-o>", self.open_file)
 
-        self.auto_save_interval = 5 * 60 * 1000
+        # Auto-save
+        self.auto_save_interval = 5 * 60 * 1000  # 5 minutes
         self.root.after(self.auto_save_interval, self.auto_save)
 
     def auto_save(self):
@@ -47,18 +63,39 @@ class SimpleNotepad:
         self.root.after(self.auto_save_interval, self.auto_save)
 
     def create_menus(self):
-        menu_bar = tk.Menu(self.root, bg=self.bg_color, fg=self.fg_color)
+        # Main menu bar
+        menu_bar = tk.Menu(
+            self.root, 
+            bg=self.bg_color, 
+            fg=self.fg_color,
+            font=self.menu_tab_font  # This affects menu tabs
+        )
         self.root.config(menu=menu_bar)
 
-        file_menu = tk.Menu(menu_bar, tearoff=0, bg=self.bg_color, fg=self.fg_color)
+        # File menu
+        file_menu = tk.Menu(
+            menu_bar, 
+            tearoff=0, 
+            bg=self.bg_color, 
+            fg=self.fg_color,
+            font=self.menu_item_font  # Affects dropdown items
+        )
         menu_bar.add_cascade(label="File", menu=file_menu)
         file_menu.add_command(label="New", command=self.new_file)
         file_menu.add_command(label="Open", command=self.open_file)
         file_menu.add_command(label="Save", command=self.save_file)
         file_menu.add_command(label="Save As", command=self.save_as_file)
+        file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self.exit_app)
 
-        edit_menu = tk.Menu(menu_bar, tearoff=0, bg=self.bg_color, fg=self.fg_color)
+        # Edit menu
+        edit_menu = tk.Menu(
+            menu_bar, 
+            tearoff=0, 
+            bg=self.bg_color, 
+            fg=self.fg_color,
+            font=self.menu_item_font
+        )
         menu_bar.add_cascade(label="Edit", menu=edit_menu)
         edit_menu.add_command(label="Undo", command=self.undo)
         edit_menu.add_command(label="Redo", command=self.redo)
@@ -74,10 +111,20 @@ class SimpleNotepad:
         edit_menu.add_separator()
         edit_menu.add_command(label="Search Selected Word on Edge", command=self.search_selected_word_on_edge)
 
-        font_menu = tk.Menu(menu_bar, tearoff=0, bg=self.bg_color, fg=self.fg_color)
+        # Font Size menu
+        font_menu = tk.Menu(
+            menu_bar, 
+            tearoff=0, 
+            bg=self.bg_color, 
+            fg=self.fg_color,
+            font=self.menu_item_font
+        )
         menu_bar.add_cascade(label="Font Size", menu=font_menu)
         for size in range(8, 37, 2):
-            font_menu.add_command(label=str(size), command=lambda s=size: self.change_font_size(s))
+            font_menu.add_command(
+                label=str(size), 
+                command=lambda s=size: self.change_font_size(s)
+            )
 
     def new_file(self):
         if self.confirm_unsaved_changes():
@@ -277,7 +324,6 @@ class SimpleNotepad:
 
         replace_popup.mainloop()
 
-# Launch app
 if __name__ == "__main__":
     root = tk.Tk()
     app = SimpleNotepad(root)
